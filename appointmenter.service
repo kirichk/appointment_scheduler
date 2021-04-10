@@ -1,0 +1,14 @@
+[Unit]
+Description=Appointment Scheduler
+After=network.target
+
+[Service]
+User=root
+Group=root
+
+WorkingDirectory=/home/debian/appointment_scheduler/
+ExecStart=/home/debian/appointment_scheduler/env/bin/python /home/debian/appointment_scheduler/app.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
