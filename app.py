@@ -6,6 +6,7 @@ from flask import Flask, request
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -124,7 +125,7 @@ if __name__ == '__main__':
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     options.add_argument('--no-sandbox')
-    driver=webdriver.Chrome(executable_path=DRIVER_PATH,options=options)
+    driver=webdriver.Chrome(executable_path=ChromeDriverManager().install(),options=options)
     driver.get('https://cgifederal.secure.force.com/?language=English&country=Kazakhstan')
     # driver.get('https://cgifederal.secure.force.com/?language=English&country=Ukraine')
     captcha_funnel()
