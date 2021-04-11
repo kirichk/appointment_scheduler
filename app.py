@@ -17,7 +17,7 @@ LOGIN = os.getenv("LOGIN")
 PASS = os.getenv("PASS")
 
 bot = telebot.TeleBot(TOKEN)
-DRIVER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chromedriver')
+DRIVER_PATH = os.path.join(os.path.dirname(__file__), 'chromedriver')
 server = Flask(__name__)
 
 captcha_xpath = '/html/body/div[1]/div/div/div/span/form/div[2]/div[2]/table/tbody/tr[4]/td/span/div'
@@ -58,7 +58,7 @@ def captcha_checker():
         return True
     except:
         return False
-    
+
 
 def main_page_updater():
     try:
