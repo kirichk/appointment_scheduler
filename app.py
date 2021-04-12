@@ -76,7 +76,7 @@ def main_page_updater():
             if captcha_checker():
                 captcha_funnel()
             else:
-                driver.find_element_by_xpath(resident_button_xpath).click()
+                driver.find_element_by_xpath(non_resident_button_xpath).click()
                 time.sleep(1)
             if captcha_checker():
                 captcha_funnel()
