@@ -125,7 +125,7 @@ if __name__ == '__main__':
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     options.add_argument('--no-sandbox')
-    driver=webdriver.Chrome(executable_path=DRIVER_PATH,options=options)
+    driver=webdriver.Chrome(executable_path='/usr/local/bin/chromedriver',options=options)
     driver.get('https://cgifederal.secure.force.com/?language=English&country=Kazakhstan')
     # driver.get('https://cgifederal.secure.force.com/?language=English&country=Ukraine')
     captcha_funnel()
