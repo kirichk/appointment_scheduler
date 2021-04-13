@@ -17,7 +17,6 @@ TOKEN = os.getenv("TOKEN")
 ADMIN = os.getenv("ADMIN")
 LOGIN = os.getenv("LOGIN")
 PASS = os.getenv("PASS")
-TRIES_PER_RUN = 0
 
 bot = telebot.TeleBot(TOKEN)
 DRIVER_PATH = os.path.join(os.path.dirname(__file__), 'chromedriver_linux')
@@ -81,8 +80,8 @@ def main_page_updater():
         else:
             driver.find_element_by_xpath(continue_button_xpath).click()
             time.sleep(2)
-    except:
-        pass
+    except Exception as e:
+        print(e)
     while True:
         try:
             if captcha_checker():
@@ -104,8 +103,8 @@ def main_page_updater():
                 time.sleep(3600)
             else:
                 book_appointment()
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
 
 def fill_login_form(message):
@@ -135,6 +134,7 @@ def captcha_funnel():
 
 
 if __name__ == '__main__':
+    TRIES_PER_RUN = 0
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     options.add_argument('--no-sandbox')
