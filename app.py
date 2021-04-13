@@ -84,11 +84,14 @@ def main_page_updater():
         print(e)
     while True:
         try:
-            if captcha_checker():
-                captcha_funnel()
-            else:
-                driver.find_element_by_xpath(non_resident_button_xpath).click()
-                time.sleep(1)
+            try:
+                if captcha_checker():
+                    captcha_funnel()
+                else:
+                    driver.find_element_by_xpath(non_resident_button_xpath).click()
+                    time.sleep(1)
+            except Exception as e:
+                print(e)
             if captcha_checker():
                 captcha_funnel()
             else:
