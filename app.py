@@ -16,6 +16,7 @@ TOKEN = os.getenv("TOKEN")
 ADMIN = os.getenv("ADMIN")
 LOGIN = os.getenv("LOGIN")
 PASS = os.getenv("PASS")
+TRIES_PER_RUN = 0
 
 bot = telebot.TeleBot(TOKEN)
 DRIVER_PATH = os.path.join(os.path.dirname(__file__), 'chromedriver_linux')
@@ -37,8 +38,14 @@ info_badge_xpath = '/html/body/div[1]/div/div/div/div/p/strong'
 
 @bot.message_handler(content_types=['text'])
 def answer_handler(message):
-    fill_login_form(message.text)
-    captcha_funnel()
+    if message.text == 'check':
+        screenshot = driver.save_screenshot('img.png')
+        photo = open('img.png', 'rb')
+        bot.send_photo(ADMIN, photo)
+        bot.send_message(ADMIN, f'Number of tries - {TRIES_PER_RUN}')
+    else:
+        fill_login_form(message.text)
+        captcha_funnel()
 
 
 def book_appointment():
@@ -70,7 +77,6 @@ def main_page_updater():
             time.sleep(2)
     except:
         pass
-    counter = 0
     while True:
         try:
             if captcha_checker():
@@ -82,7 +88,7 @@ def main_page_updater():
                 captcha_funnel()
             else:
                 driver.find_element_by_xpath(continue_resident_button_xpath).click()
-                counter += 1
+                TRIES_PER_RUN += 1
                 time.sleep(2)
             if driver.find_element_by_xpath(info_badge_xpath).text == 'There are currently no appointments available.':
                 driver.find_element_by_xpath(back_button_xpath).click()
@@ -112,6 +118,7 @@ def fill_login_form(message):
 
 def captcha_funnel():
     if captcha_checker():
+        driver.send_keys(Keys.END)
         time.sleep(2)
         screenshot = driver.save_screenshot('img.png')
         photo = open('img.png', 'rb')
