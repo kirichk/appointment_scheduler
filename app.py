@@ -6,6 +6,7 @@ from flask import Flask, request
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 
 
@@ -118,6 +119,7 @@ def fill_login_form(message):
 
 def captcha_funnel():
     if captcha_checker():
+        driver.find_element_by_xpath(captcha_result_xpath).send_keys(Keys.END)
         driver.send_keys(Keys.END)
         time.sleep(2)
         screenshot = driver.save_screenshot('img.png')
