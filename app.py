@@ -44,6 +44,11 @@ def answer_handler(message):
         photo = open('img.png', 'rb')
         bot.send_photo(ADMIN, photo)
         bot.send_message(ADMIN, f'Number of tries - {TRIES_PER_RUN}')
+        if captcha_checker():
+            captcha_funnel()
+        else:
+            driver.get('https://cgifederal.secure.force.com/applicanthome')
+            main_page_updater()
     else:
         fill_login_form(message.text)
         captcha_funnel()
