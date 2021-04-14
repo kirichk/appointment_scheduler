@@ -19,7 +19,7 @@ LOGIN = os.getenv("LOGIN")
 PASS = os.getenv("PASS")
 
 bot = telebot.TeleBot(TOKEN)
-DRIVER_PATH = os.path.join(os.path.dirname(__file__), 'chromedriver_linux')
+DRIVER_PATH = os.path.join(os.path.dirname(__file__), 'chromedriver')
 server = Flask(__name__)
 
 captcha_xpath = '/html/body/div[1]/div/div/div/span/form/div[2]/div[2]/table/tbody/tr[4]/td/span/div'
@@ -34,6 +34,7 @@ resident_button_xpath = '/html/body/div/div/div/div/form/table/tbody/tr[2]/td/di
 continue_resident_button_xpath = '/html/body/div/div/div/div/form/table/tbody/tr[3]/td[2]/input'
 back_button_xpath = '/html/body/div[1]/div/div/div/form/input[2]'
 info_badge_xpath = '/html/body/div[1]/div/div/div/div/p/strong'
+max_times_approaching = '/html/body/div[1]/div/div/div/span[2]/div/p/span[2]'
 
 
 @bot.message_handler(content_types=['text'])
@@ -41,8 +42,15 @@ def answer_handler(message):
     if message.text == 'check':
         screenshot = driver.save_screenshot('img.png')
         photo = open('img.png', 'rb')
+        num = 0
+        with open('data.txt', 'r+') as f:
+            contents = f.readlines()
+            if contents:
+                num = int(contents[0])
+            else:
+                num = 0
         bot.send_photo(ADMIN, photo)
-        bot.send_message(ADMIN, f'Number of tries - {TRIES_PER_RUN}')
+        bot.send_message(ADMIN, f'Number of tries - {num}')
         if captcha_checker():
             captcha_funnel()
         else:
@@ -83,31 +91,58 @@ def main_page_updater():
     except Exception as e:
         print(e)
     while True:
+        CALENDAR = True
         try:
-            try:
-                if captcha_checker():
-                    captcha_funnel()
-                else:
-                    driver.find_element_by_xpath(non_resident_button_xpath).click()
-                    time.sleep(1)
-            except Exception as e:
-                print(e)
             if captcha_checker():
                 captcha_funnel()
             else:
-                driver.find_element_by_xpath(continue_resident_button_xpath).click()
-                TRIES_PER_RUN += 1
-                time.sleep(2)
-            if driver.find_element_by_xpath(info_badge_xpath).text == 'There are currently no appointments available.':
-                driver.find_element_by_xpath(back_button_xpath).click()
-                time.sleep(300)
-            elif driver.find_element_by_xpath(info_badge_xpath).text == 'You are approaching the maximum number of times you may view this page. Please complete your transaction at this time.':
-                bot.send_message(ADMIN, f'Blocked after {counter} page refreshes')
-                time.sleep(3600)
-            else:
-                book_appointment()
+                driver.find_element_by_xpath(non_resident_button_xpath).click()
+                time.sleep(1)
         except Exception as e:
             print(e)
+        if captcha_checker():
+            captcha_funnel()
+        else:
+            driver.find_element_by_xpath(continue_resident_button_xpath).click()
+            num = 0
+            with open('data.txt', 'r+') as f:
+                contents = f.readlines()
+                if contents:
+                    num = int(contents[0])
+                else:
+                    num = 0
+            with open('data.txt', 'w') as f:
+                f.write(str(num+1))
+            time.sleep(2)
+        try:
+            driver.find_element_by_xpath(info_badge_xpath)
+            driver.find_element_by_xpath(back_button_xpath).click()
+            CALENDAR = False
+            time.sleep(300)
+        except:
+            pass
+        try:
+            driver.find_element_by_xpath(max_times_approaching)
+            num = 0
+            with open('data.txt', 'r+') as f:
+                contents = f.readlines()
+                if contents:
+                    num = int(contents[0])
+                else:
+                    num = 0
+            with open('data.txt', 'w') as f:
+                f.truncate(0)
+                bot.send_message(ADMIN, f'Blocked after {num} page refreshes')
+            CALENDAR = False
+            time.sleep(3600)
+        except:
+            pass
+        if CALENDAR:
+            try:
+                book_appointment()
+            except:
+                pass
+
 
 
 def fill_login_form(message):
@@ -137,10 +172,10 @@ def captcha_funnel():
 
 
 if __name__ == '__main__':
-    TRIES_PER_RUN = 0
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     options.add_argument('--no-sandbox')
+    # driver=webdriver.Chrome(executable_path=DRIVER_PATH,options=options)
     driver=webdriver.Chrome(executable_path='/usr/local/bin/chromedriver',options=options)
     driver.get('https://cgifederal.secure.force.com/?language=English&country=Kazakhstan')
     # driver.get('https://cgifederal.secure.force.com/?language=English&country=Ukraine')
