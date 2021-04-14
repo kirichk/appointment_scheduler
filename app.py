@@ -32,6 +32,7 @@ continue_button_xpath = '/html/body/div/div/div/form/span/div/div/div/ul/span[1]
 non_resident_button_xpath = '/html/body/div/div/div/div/form/table/tbody/tr[2]/td/div/table/tbody/tr[2]/td/input'
 resident_button_xpath = '/html/body/div/div/div/div/form/table/tbody/tr[2]/td/div/table/tbody/tr[1]/td/input'
 continue_resident_button_xpath = '/html/body/div/div/div/div/form/table/tbody/tr[3]/td[2]/input'
+test_button = '/html/body/div/div/div/div/form/table/tbody/tr[3]/td[2]/input'
 back_button_xpath = '/html/body/div[1]/div/div/div/form/input[2]'
 info_badge_xpath = '/html/body/div[1]/div/div/div/div/p/strong'
 max_times_approaching = '/html/body/div[1]/div/div/div/span[2]/div/p/span[2]'
@@ -66,8 +67,10 @@ def book_appointment():
     with open("source.txt", "w") as text_file:
         text_file.write(html)
     f = open('source.txt','rb')
-    bot.send_document(chat_id=ADMIN, document=f, filename='html.txt')
+    bot.send_document(chat_id=ADMIN, data=f)
+    print('Should send a message')
     if not driver.find_element_by_name('thePage:SiteTemplate:theForm:j_id194:0:j_id196').get_attribute('checked'):
+        print('Clicking if selected')
         driver.find_element_by_name('thePage:SiteTemplate:theForm:j_id194:0:j_id196').click()
     driver.find_element_by_name('thePage:SiteTemplate:theForm:addItem').click()
     bot.send_message(ADMIN, 'Scheduled appointment')
@@ -103,7 +106,10 @@ def main_page_updater():
         if captcha_checker():
             captcha_funnel()
         else:
-            driver.find_element_by_xpath(continue_resident_button_xpath).click()
+            try:
+                driver.find_element_by_xpath(continue_resident_button_xpath).click()
+            except:
+                pass
             num = 0
             with open('data.txt', 'r+') as f:
                 contents = f.readlines()
@@ -117,12 +123,14 @@ def main_page_updater():
         try:
             driver.find_element_by_xpath(info_badge_xpath)
             driver.find_element_by_xpath(back_button_xpath).click()
+            print('Info badge')
             CALENDAR = False
             time.sleep(300)
         except:
             pass
         try:
             driver.find_element_by_xpath(max_times_approaching)
+            print('Max times')
             num = 0
             with open('data.txt', 'r+') as f:
                 contents = f.readlines()
@@ -137,12 +145,12 @@ def main_page_updater():
             time.sleep(3600)
         except:
             pass
+        print(CALENDAR)
         if CALENDAR:
             try:
                 book_appointment()
             except:
                 pass
-
 
 
 def fill_login_form(message):
